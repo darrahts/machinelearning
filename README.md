@@ -70,6 +70,9 @@ I didn't run into this problem until running the code on a different laptop than
 #### Whats included:
 
 
+## Fraud Detection
+ - this is NOT my original code, I can't remember where I found it from (I think kaggle). 
+
 
 
 
