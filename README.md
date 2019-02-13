@@ -1,2 +1,2 @@
 # machinelearning
-Collection of jupyter notebooks for machine learning
+Collection of python files and jupyter notebooks for machine learning
