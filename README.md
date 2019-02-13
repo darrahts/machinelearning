@@ -1,7 +1,7 @@
 # machinelearning
-Collection of python files and jupyter notebooks for machine learning.
+Collection of python files and jupyter notebooks for machine learning. After taking a few different online machine learning courses I decided to compile everything I learned in one location.
 
-## Regression notes:
+## Regression
 - Some environments will complain about the shape of y or y_pred with errors like: 
 
 ```
@@ -26,7 +26,7 @@ I didn't run into this problem until running the code on a different laptop than
 - Position_Salaries.csv
 
 
-## Classification notes:
+## Classification
 
 #### whats included:
 - K-nearest-neighbors
@@ -38,11 +38,38 @@ I didn't run into this problem until running the code on a different laptop than
 - Social_Network_Ads.csv
 
 
-## Clustering notes:
+## Clustering:
 **jupyter notebooks from here on**
 - hierarchical clustering
 - k-means clustering
 - Mall_Customers.csv
+
+
+## Association Rule Learning
+
+#### whats included:
+
+
+## Reinforcement Learning
+
+#### whats included:
+
+
+## Natural Language Processing
+
+#### Whats included:
+
+
+## Dimensionality Reduction
+
+#### Whats included:
+
+
+## Models and Boosting
+
+#### Whats included:
+
+
 
 
 
