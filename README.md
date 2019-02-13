@@ -35,3 +35,15 @@ I didn't run into this problem until running the code on a different laptop than
 - support vector machine
 - logistic regression (as a binary classifier)
 - Social_Network_Ads.csv
+
+
+## Clustering notes:
+**jupyter notebooks from here on**
+- hierarchical clustering
+- k-means clustering
+- Mall_Customers.csv
+
+
+
+
+
