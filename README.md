@@ -68,9 +68,7 @@ I didn't run into this problem until running the code on a different laptop than
 ## Dimensionality Reduction
 
 #### Whats included:
-- PCA
-- LDA
-- kernel PCA
+- dim reduction (PCA, LDA, kernel PCA)
 - Wine.csv 
 
 ## Models and Boosting
