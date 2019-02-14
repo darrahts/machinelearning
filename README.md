@@ -77,8 +77,6 @@ I didn't run into this problem until running the code on a different laptop than
 #### Whats included:
 - xgboost
 - cross validation
-- grid search (hyperparameters)
-- random search (hyperparameters)
 - Churn_Modelling.csv
 - Social_Network_Ads.csv
 
