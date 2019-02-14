@@ -72,7 +72,7 @@ I didn't run into this problem until running the code on a different laptop than
 - kernel PCA
 - Wine.csv 
 
-## Models and Boosting
+## Model Boosting
 
 #### Whats included:
 - xgboost
