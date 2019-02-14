@@ -48,17 +48,22 @@ I didn't run into this problem until running the code on a different laptop than
 ## Association Rule Learning
 
 #### whats included:
-
+- apriori
+- apyori (library which implements apriori)
+- Market_Basket_Optimisation.csv
+- store_data.csv
 
 ## Reinforcement Learning
 
 #### whats included:
-
+- reinforcementlearning
+- Ads_CTR_Optimisation.csv
 
 ## Natural Language Processing
 
 #### Whats included:
-
+- nlpBagOfWords
+Restaurant_Reviews.tsv
 
 ## Dimensionality Reduction
 
