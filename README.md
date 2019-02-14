@@ -56,24 +56,32 @@ I didn't run into this problem until running the code on a different laptop than
 ## Reinforcement Learning
 
 #### whats included:
-- reinforcementlearning
+- reinforcement learning
 - Ads_CTR_Optimisation.csv
 
 ## Natural Language Processing
 
 #### Whats included:
-- nlpBagOfWords
-Restaurant_Reviews.tsv
+- nlp bag of words
+- Restaurant_Reviews.tsv
 
 ## Dimensionality Reduction
 
 #### Whats included:
-
+- PCA
+- LDA
+- kernel PCA
+- Wine.csv 
 
 ## Models and Boosting
 
 #### Whats included:
-
+- xgboost
+- cross validation
+- grid search (hyperparameters)
+- random search (hyperparameters)
+- Churn_Modelling.csv
+- Social_Network_Ads.csv
 
 ## Fraud Detection
  - this is NOT my original code, I can't remember where I found it from (I think kaggle). 
