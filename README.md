@@ -33,6 +33,10 @@ I didn't run into this problem until running the code on a different laptop than
 - naive-bayes
 - decision tree
 - random forest (Jupyter Notebook)
+	- visualize trees
+	- visualize decision boundaries
+	- cumulative accurcy profile
+	- k fold cross validation
 - support vector machine
 - logistic regression (as a binary classifier)
 - Social_Network_Ads.csv
@@ -41,14 +45,17 @@ I didn't run into this problem until running the code on a different laptop than
 ## Clustering:
 **jupyter notebooks from here on**
 - hierarchical clustering
+	- dendrogram
 - k-means clustering
+	- elbow method
+	- dendrogram
 - Mall_Customers.csv
 
 
 ## Association Rule Learning
 
 #### whats included:
-- apriori
+- apriori [WIP]
 - apyori (library which implements apriori)
 - Market_Basket_Optimisation.csv
 - store_data.csv
@@ -57,12 +64,20 @@ I didn't run into this problem until running the code on a different laptop than
 
 #### whats included:
 - reinforcement learning
+	- UCB
+	- thompson sampling
+	- histogram
+	- custom plot
+	- selection trace plot
 - Ads_CTR_Optimisation.csv
 
 ## Natural Language Processing
 
 #### Whats included:
 - nlp bag of words
+	- cumulative accuracy profile
+	- grid search (random forest)
+	- random search (random forest)
 - Restaurant_Reviews.tsv
 
 ## Dimensionality Reduction
@@ -76,9 +91,7 @@ I didn't run into this problem until running the code on a different laptop than
 
 #### Whats included:
 - xgboost
-- cross validation
 - Churn_Modelling.csv
-- Social_Network_Ads.csv
 
 ## Fraud Detection
  - this is NOT my original code, I can't remember where I found it from (I think kaggle). 
