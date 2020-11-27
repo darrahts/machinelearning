@@ -1,9 +1,9 @@
 import os
+import numpy as np
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import numpy as np
 
 
 class DQN(nn.Module):
@@ -23,11 +23,12 @@ class DQN(nn.Module):
 
         self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
         self.loss = nn.MSELoss()
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.device = T.device('cuda:1' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
+        print("using: ", str(self.device))
 
     def calculate_conv_output_dims(self, input_dims):
-        state = T.zero_(1, *input_dims)
+        state = T.zeros(1, *input_dims)
         dims = self.conv1(state)
         dims = self.conv2(dims)
         dims = self.conv3(dims)

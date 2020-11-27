@@ -1,16 +1,19 @@
 import numpy as np
 from dqn_agent import DQNAgent
 from utils import make_env, plot_learning_curve
+import time
+
+
 
 ENV = 'PongNoFrameskip-v4'
-NUM_GAMES = 500
-MEM_SIZE = 50000
+NUM_GAMES = 1000
+MEM_SIZE = 96000
 BATCH_SIZE = 32
 LR = .0001
 GAMMA = .99
 EPSILON = 1.0
 EPSILON_MIN = 0.1
-EPSILON_DECAY = 1e-5
+EPSILON_DECAY = 5e-6
 ALGORITHM = 'DQNAgent'
 POLICY_UPDATE = 1000
 CHECKPOINT_DIR = 'models/'
@@ -19,13 +22,12 @@ MOVMEAN = 100
 
 
 if __name__ == "__main__":
-
     env = make_env(ENV)
     best_score = -np.inf
     load_checkpoint = False
     agent = DQNAgent(gamma=GAMMA, epsilon=EPSILON, lr=LR, input_dims=env.observation_space.shape,
                      n_actions=env.action_space.n, mem_size=MEM_SIZE, eps_min=EPSILON_MIN, batch_size=BATCH_SIZE,
-                     replace=POLICY_UPDATE, eps_dec=EPSILON_DECAY, checkpoint_dir=CHECKPOINT_DIR, algorithm=ALGORITHM,
+                     replace_count=POLICY_UPDATE, eps_dec=EPSILON_DECAY, checkpoint_dir=CHECKPOINT_DIR, algorithm=ALGORITHM,
                      env_name=ENV)
 
     if load_checkpoint:
@@ -39,6 +41,8 @@ if __name__ == "__main__":
     eps_hist = []
     steps_arr = []
 
+    tic = time.perf_counter()
+    tic1 = time.perf_counter()
     for i in range(NUM_GAMES):
         done = False
         score = 0
@@ -66,7 +70,11 @@ if __name__ == "__main__":
 
         plot_learning_curve(steps_arr, scores, eps_hist, figure_file)
 
-        if i % MOVMEAN == 0:
-            print("episode: {}\tscore: {:.1f}\tavg score: {:.1f}\tbest score: {:.1f}\teps: {:.2f}\tsteps: {}".format(i, score, avg, best_score, agent.epsilon, n_steps))
+        if i % 10 == 0:
+            toc1 = time.perf_counter()
+            print("episode: {}\tscore: {:.1f}\tavg score: {:.1f}\tbest score: {:.1f}\teps: {:.2f}\tsteps: {}\ttime: {:.3f}".format(i, score, avg, best_score, agent.epsilon, n_steps, (toc1-tic1)))
+            tic1 = time.perf_counter()
+    toc
+    print("elapsed training time: {:.3f}".format((toc-tic)))
 
 

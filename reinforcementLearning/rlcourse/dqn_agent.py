@@ -1,8 +1,7 @@
 import numpy as np
-import torch as T
 from dqn import DQN
 from replay_memory import ReplayBuffer
-
+import torch as T
 
 class DQNAgent():
     def __init__(self, gamma, epsilon, lr, n_actions, input_dims, mem_size, batch_size, eps_min=.01, eps_dec=5e-7,
@@ -77,7 +76,7 @@ class DQNAgent():
         indices = np.arange(self.batch_size)
         q_pred = self.q_eval.forward(current_states)[indices, actions]
         q_policy = self.q_policy.forward(next_states).max(dim=1)[0] # get just values
-        q_policy[dones] = 0.0
+        q_policy[dones.bool()] = 0.0
 
         q_target = rewards + self.gamma*q_policy
         loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)

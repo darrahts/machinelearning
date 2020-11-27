@@ -6,7 +6,7 @@ import cv2
 
 
 def plot_learning_curve(x, scores, epsilons, filename):
-    print("plotting figure")
+    #print("plotting figure")
     fig = plt.figure()
     ax1 = fig.add_subplot(111, label="1")
     ax2 = fig.add_subplot(111, label="2", frame_on=False)
@@ -29,6 +29,7 @@ def plot_learning_curve(x, scores, epsilons, filename):
     ax2.yaxis.set_label_position('right')
     ax2.tick_params(axis='y', colors="C1")
     plt.savefig(filename)
+    plt.close(fig)
     return
 
 
@@ -89,7 +90,7 @@ class StackFrames(gym.ObservationWrapper):
     def __init__(self, env, repeat):
         super(StackFrames, self).__init__(env)
         self.observation_space = gym.spaces.Box(env.observation_space.low.repeat(repeat, axis=0),
-                                                env.obsesrvation_space.high.repeat(repeat,axis=0),
+                                                env.observation_space.high.repeat(repeat,axis=0),
                                                 dtype=np.float32)
         self.stack = collections.deque(maxlen=repeat)
 
