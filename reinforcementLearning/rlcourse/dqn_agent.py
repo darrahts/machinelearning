@@ -80,33 +80,12 @@ class DQNAgent():
         q_policy[dones] = 0.0
 
         q_target = rewards + self.gamma*q_policy
-
         loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
         loss.backward()
         self.q_eval.optimizer.step()
         self.learn_step_counter += 1
 
         self.decrement_epsilon()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

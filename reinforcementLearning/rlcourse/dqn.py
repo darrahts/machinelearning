@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 
+
 class DQN(nn.Module):
     def __init__(self, lr, n_actions, name, input_dims, checkpoint_dir):
         super(DQN, self).__init__()
