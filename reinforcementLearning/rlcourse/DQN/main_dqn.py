@@ -50,6 +50,7 @@ def train(env, agent, n_games, load_checkpoint=False):
         while not done:
             action = agent.choose_action(obs)
             next_obs, reward, done, info = env.step(action)
+            env.render()
             score += reward
 
             # if training store the transition
