@@ -53,6 +53,22 @@ class Agent():
         self.q_eval.load_checkpoint()
         self.q_policy.load_checkpoint()
 
+    def pre_learn(self):
+        if self.memory.mem_idx < self.batch_size:
+            return
+        self.q_eval.optimizer.zero_grad()
+        self.update_policy_network()
+        current_states, actions, rewards, next_states, dones = self.sample_memory()
+        indices = np.arange(self.batch_size)
+        return current_states, actions, rewards, next_states, dones, indices
+
+    def post_learn(self, q_target, q_pred):
+        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
+        loss.backward()
+        self.q_eval.optimizer.step()
+        self.learn_step_counter += 1
+
+        self.decrement_epsilon()
 
     def choose_action(self, observation, network):
         raise NotImplementedError
@@ -86,24 +102,13 @@ class DQNAgent(Agent):
         return action
 
     def learn(self):
-        if self.memory.mem_idx < self.batch_size:
-            return
-        self.q_eval.optimizer.zero_grad()
-        self.update_policy_network()
-        current_states, actions, rewards, next_states, dones = self.sample_memory()
-        indices = np.arange(self.batch_size)
-
+        current_states, actions, rewards, next_states, dones, indices = self.pre_learn()
         q_pred = self.q_eval.forward(current_states)[indices, actions]
         q_policy = self.q_policy.forward(next_states).max(dim=1)[0] # get just values
         q_policy[dones.bool()] = 0.0
 
         q_target = rewards + self.gamma*q_policy
-        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
-        loss.backward()
-        self.q_eval.optimizer.step()
-        self.learn_step_counter += 1
-
-        self.decrement_epsilon()
+        self.post_learn(q_target, q_pred)
 
 
 class DDQNAgent(Agent):
@@ -131,13 +136,7 @@ class DDQNAgent(Agent):
         return action
 
     def learn(self):
-        if self.memory.mem_idx < self.batch_size:
-            return
-
-        self.q_eval.optimizer.zero_grad()
-        self.update_policy_network()
-        current_states, actions, rewards, next_states, dones = self.sample_memory()
-        indices = np.arange(self.batch_size)
+        current_states, actions, rewards, next_states, dones, indices = self.pre_learn()
         q_pred = self.q_eval.forward(current_states)[indices, actions]
         q_policy = self.q_policy.forward(next_states)
         q_eval = self.q_eval.forward(next_states)
@@ -145,12 +144,7 @@ class DDQNAgent(Agent):
         max_actions = T.argmax(q_eval, dim=1)
         q_policy[dones.bool()] = 0.0
         q_target = rewards + self.gamma*q_policy[indices, max_actions]
-        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
-        loss.backward()
-        self.q_eval.optimizer.step()
-        self.learn_step_counter += 1
-
-        self.decrement_epsilon()
+        self.post_learn(q_target, q_pred)
 
 
 class DuelingDDQNAgent(Agent):
@@ -163,25 +157,22 @@ class DuelingDDQNAgent(Agent):
         self.q_policy = DuelingDDQN(self.lr, self.n_actions, input_dims=self.input_dims,
                           name=self.env_name+"_"+self.algorithm+"_q_policy", checkpoint_dir=self.checkpoint_dir)
 
-    def choose_action(self, observation):
+    def choose_action(self, observation, network="eval"):
         r = np.random.random()
         if r > self.epsilon:
-            state = T.tensor([observation], dtype=T.float).to(self.q_eval.device)
-            _, advantage = self.q_eval.forward(state)
+            if(network == "eval"):
+                state = T.tensor([observation], dtype=T.float).to(self.q_eval.device)
+                _, advantage = self.q_eval.forward(state)
+            elif(network == "policy"):
+                state = T.tensor([observation], dtype=T.float).to(self.q_policy.device)
+                _, advantage = self.q_policy.forward(state)
             action = T.argmax(advantage).item()
         else:
             action = np.random.choice(self.action_space)
         return action
 
     def learn(self):
-        if self.memory.mem_idx < self.batch_size:
-            return
-
-        self.q_eval.optimizer.zero_grad()
-        self.update_policy_network()
-        current_states, actions, rewards, next_states, dones = self.sample_memory()
-        indices = np.arange(self.batch_size)
-
+        current_states, actions, rewards, next_states, dones, indices = self.pre_learn()
         Vs, As, = self.q_eval.forward(current_states)
         Vs_policy, As_policy = self.q_policy.forward(next_states)
 
@@ -196,9 +187,4 @@ class DuelingDDQNAgent(Agent):
 
         q_next[dones.bool()] = 0.0
         q_target = rewards + self.gamma*q_next[indices, max_actions]
-        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
-        loss.backward()
-        self.q_eval.optimizer.step()
-        self.learn_step_counter += 1
-
-        self.decrement_epsilon()
+        self.post_learn(q_target, q_pred)
