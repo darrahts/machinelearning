@@ -63,7 +63,7 @@ class Agent():
 
 class DQNAgent(Agent):
     def __init__(self, *args, **kwargs):
-
+        super(DQNAgent, self).__init__(*args, **kwargs)
 
         self.q_eval = DQN(self.lr, self.n_actions, input_dims=self.input_dims,
                           name=self.env_name+"_"+self.algorithm+"_q_eval", checkpoint_dir=self.checkpoint_dir)
@@ -71,11 +71,60 @@ class DQNAgent(Agent):
         self.q_policy = DQN(self.lr, self.n_actions, input_dims=self.input_dims,
                           name=self.env_name+"_"+self.algorithm+"_q_policy", checkpoint_dir=self.checkpoint_dir)
 
-    def choose_action(self, observation):
+    def choose_action(self, observation, network="eval"):
         r = np.random.random()
         if r > self.epsilon:
-            state = T.tensor([observation], dtype=T.float).to(self.q_eval.device)
-            actions = self.q_eval.forward(state)
+            if(network == "eval"):
+                state = T.tensor([observation], dtype=T.float).to(self.q_eval.device)
+                actions = self.q_eval.forward(state)
+            elif(network == "policy"):
+                state = T.tensor([observation], dtype=T.float).to(self.q_policy.device)
+                actions = self.q_policy.forward(state)
+            action = T.argmax(actions).item()
+        else:
+            action = np.random.choice(self.action_space)
+        return action
+
+    def learn(self):
+        if self.memory.mem_idx < self.batch_size:
+            return
+        self.q_eval.optimizer.zero_grad()
+        self.update_policy_network()
+        current_states, actions, rewards, next_states, dones = self.sample_memory()
+        indices = np.arange(self.batch_size)
+
+        q_pred = self.q_eval.forward(current_states)[indices, actions]
+        q_policy = self.q_policy.forward(next_states).max(dim=1)[0] # get just values
+        q_policy[dones.bool()] = 0.0
+
+        q_target = rewards + self.gamma*q_policy
+        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
+        loss.backward()
+        self.q_eval.optimizer.step()
+        self.learn_step_counter += 1
+
+        self.decrement_epsilon()
+
+
+class DDQNAgent(Agent):
+    def __init__(self, *args, **kwargs):
+        super(DDQNAgent, self).__init__(*args, **kwargs)
+
+        self.q_eval = DQN(self.lr, self.n_actions, input_dims=self.input_dims,
+                          name=self.env_name+"_"+self.algorithm+"_q_eval", checkpoint_dir=self.checkpoint_dir)
+
+        self.q_policy = DQN(self.lr, self.n_actions, input_dims=self.input_dims,
+                          name=self.env_name+"_"+self.algorithm+"_q_policy", checkpoint_dir=self.checkpoint_dir)
+
+    def choose_action(self, observation, network="eval"):
+        r = np.random.random()
+        if r > self.epsilon:
+            if(network == "eval"):
+                state = T.tensor([observation], dtype=T.float).to(self.q_eval.device)
+                actions = self.q_eval.forward(state)
+            elif(network == "policy"):
+                state = T.tensor([observation], dtype=T.float).to(self.q_policy.device)
+                actions = self.q_policy.forward(state)
             action = T.argmax(actions).item()
         else:
             action = np.random.choice(self.action_space)
@@ -90,10 +139,12 @@ class DQNAgent(Agent):
         current_states, actions, rewards, next_states, dones = self.sample_memory()
         indices = np.arange(self.batch_size)
         q_pred = self.q_eval.forward(current_states)[indices, actions]
-        q_policy = self.q_policy.forward(next_states).max(dim=1)[0] # get just values
-        q_policy[dones.bool()] = 0.0
+        q_policy = self.q_policy.forward(next_states)
+        q_eval = self.q_eval.forward(next_states)
 
-        q_target = rewards + self.gamma*q_policy
+        max_actions = T.argmax(q_eval, dim=1)
+        q_policy[dones.bool()] = 0.0
+        q_target = rewards + self.gamma*q_policy[indices, max_actions]
         loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
         loss.backward()
         self.q_eval.optimizer.step()
@@ -102,8 +153,52 @@ class DQNAgent(Agent):
         self.decrement_epsilon()
 
 
+class DuelingDDQNAgent(Agent):
+    def __init__(self, *args, **kwargs):
+        super(DuelingDDQNAgent, self).__init__(*args, **kwargs)
 
+        self.q_eval = DuelingDDQN(self.lr, self.n_actions, input_dims=self.input_dims,
+                          name=self.env_name+"_"+self.algorithm+"_q_eval", checkpoint_dir=self.checkpoint_dir)
 
+        self.q_policy = DuelingDDQN(self.lr, self.n_actions, input_dims=self.input_dims,
+                          name=self.env_name+"_"+self.algorithm+"_q_policy", checkpoint_dir=self.checkpoint_dir)
 
+    def choose_action(self, observation):
+        r = np.random.random()
+        if r > self.epsilon:
+            state = T.tensor([observation], dtype=T.float).to(self.q_eval.device)
+            _, advantage = self.q_eval.forward(state)
+            action = T.argmax(advantage).item()
+        else:
+            action = np.random.choice(self.action_space)
+        return action
 
+    def learn(self):
+        if self.memory.mem_idx < self.batch_size:
+            return
 
+        self.q_eval.optimizer.zero_grad()
+        self.update_policy_network()
+        current_states, actions, rewards, next_states, dones = self.sample_memory()
+        indices = np.arange(self.batch_size)
+
+        Vs, As, = self.q_eval.forward(current_states)
+        Vs_policy, As_policy = self.q_policy.forward(next_states)
+
+        Vs_eval, As_eval = self.q_eval.forward(next_states)
+
+        q_pred = T.add(Vs, (As - As.mean(dim=1, keepdim=True)))[indices, actions]
+        q_next = T.add(Vs_policy, (As_policy - As_policy.mean(dim=1, keepdim=True)))
+
+        q_eval = T.add(Vs_eval, (As_eval - As_eval.mean(dim=1, keepdim=True)))
+
+        max_actions = T.argmax(q_eval, dim=1)
+
+        q_next[dones.bool()] = 0.0
+        q_target = rewards + self.gamma*q_next[indices, max_actions]
+        loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
+        loss.backward()
+        self.q_eval.optimizer.step()
+        self.learn_step_counter += 1
+
+        self.decrement_epsilon()
