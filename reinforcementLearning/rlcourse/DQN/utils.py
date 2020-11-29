@@ -66,8 +66,11 @@ class RepeatActionAndMaxFrame(gym.Wrapper):
             if(done):
                 self.env.reset()
         if(self.fire_first):
-            assert self.env.unwrapped.get_action_meanings()[1] == 'FIRE'
-            obs, _, _, _ = self.env.step(1)
+            try:
+                assert self.env.unwrapped.get_action_meanings()[1] == 'FIRE'
+                obs, _, _, _ = self.env.step(1)
+            except:
+                pass
         self.frame_buffer = np.zeros_like((2, self.shape))
         self.frame_buffer[0] = obs
         return obs

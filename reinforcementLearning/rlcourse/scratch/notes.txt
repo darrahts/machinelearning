@@ -1,0 +1,41 @@
+defining the environment:
+
+what changes when the agent acts?
+
+Q learning is for discrete spaces
+actor-critic is for continuous spaces
+
+for episodic tasks, terminal state E(return) = 0 (i.e. value = 0)
+episode = discrete period of game play
+
+for episodic tasks with terminal states, gamma can be 1 (since terminal state ensures convergence)
+
+q learning is model-free, i.e. approximate T
+temporal difference learning, update at each time step
+
+monte carlo methods, update at end of each episode
+
+epsilon greedy (random action vs greedy action), slowly decay epsilon over time
+
+how can we be sure we have an accurate model of the environment?
+
+new = old + step(actual - old)
+
+Vt = Vt + a(Rt1 + gVt1 - Vt)
+
+Q(st, at) = Q(st,at) + a(R(t+1) + g(max(Q(st+1,a)))-Q(st,at))
+
+off policy learning evaluate and improve a policy different from the policy that is used for
+selecting actions (Q learning), agent can learn from demonstration
+
+on policy use the same policy for action selection and evaluation (value/policy iteration)
+
+TDL is online
+Q learning is tabular and off policy
+
+
+
+---
+iterative policy evaluation
+> find value for a given policy (prediction)
+>> find policy with max value (control)
