@@ -53,11 +53,8 @@ def train(env, agent, n_games, load_checkpoint, early_stopping, visualize):
             if(visualize):
                 env.render()
             score += reward
-
-            # if training store the transition
-            if not load_checkpoint:
-                agent.store_transition(obs, action, reward, next_obs, int(done))
-                agent.learn()
+            agent.store_transition(obs, action, reward, next_obs, int(done))
+            agent.learn()
             obs = next_obs
             n_steps += 1
         scores.append(score)
@@ -66,8 +63,7 @@ def train(env, agent, n_games, load_checkpoint, early_stopping, visualize):
 
         avg = np.mean(scores[-MOVMEAN:])
         if avg > best_score:
-            if not load_checkpoint:
-                agent.save_models()
+            agent.save_models()
             best_score = avg
 
         plot_learning_curve(steps_arr, scores, eps_hist, figure_file)
@@ -99,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument('-n_games', type=int, default=1, help="number of games to play")
     parser.add_argument('-lr', type=float, default=1e-4, help="learning rate for optimizer")
     parser.add_argument('-epsilon', type=float, default=1.0, help="initial epsilon-greedy value")
-    parser.add_argument('-eps_dec', type=float, default=1e-5, help="linear decay factor")
+    parser.add_argument('-eps_decay', type=float, default=1e-5, help="linear decay factor")
     parser.add_argument('-eps_min', type=float, default=.1, help="minimum epsilon-greedy value")
     parser.add_argument('-gamma', type=float, default=.99, help="discount factor Q value update")
     parser.add_argument('-max_mem', type=int, default=64000, help="replay buffer size")
@@ -131,7 +127,7 @@ if __name__ == "__main__":
     agent = user_agent(gamma=args.gamma, epsilon=args.epsilon, lr=args.lr,
                      input_dims=env.observation_space.shape, n_actions=env.action_space.n,
                      mem_size=args.max_mem, eps_min=args.eps_min, batch_size=args.batch_size,
-                    replace_count=args.update, eps_dec=args.eps_dec,
+                    replace_count=args.update, eps_dec=args.eps_decay,
                      checkpoint_dir=args.path, algorithm=args.agent,
                     env_name=args.env)
 
