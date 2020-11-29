@@ -26,7 +26,7 @@ FIGURES_DIR = 'figures/'
 MOVMEAN = 100
 
 
-def train(env, agent, n_games, load_checkpoint=False, early_stopping=False):
+def train(env, agent, n_games, load_checkpoint, early_stopping, visualize):
     best_score = -np.inf
     load_checkpoint = False
 
@@ -50,7 +50,8 @@ def train(env, agent, n_games, load_checkpoint=False, early_stopping=False):
         while not done:
             action = agent.choose_action(obs)
             next_obs, reward, done, info = env.step(action)
-            #env.render()
+            if(visualize):
+                env.render()
             score += reward
 
             # if training store the transition
@@ -95,7 +96,7 @@ def play(env, agent, n_games, frame_delay):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="DQN Learning Human Level Control Paper")
-    parser.add_argument('-n_games', type=int, default=101, help="number of games to play")
+    parser.add_argument('-n_games', type=int, default=1, help="number of games to play")
     parser.add_argument('-lr', type=float, default=1e-4, help="learning rate for optimizer")
     parser.add_argument('-epsilon', type=float, default=1.0, help="initial epsilon-greedy value")
     parser.add_argument('-eps_dec', type=float, default=1e-5, help="linear decay factor")
@@ -118,6 +119,7 @@ if __name__ == "__main__":
     parser.add_argument('-fire_first', type=bool, default=False, help="if playing SpaceInvadersNoFrameskip-v4, fire first?")
     parser.add_argument('-frame_delay', type=float, default=.05, help="frame delay in seconds, default=.05")
     parser.add_argument('-early_stopping', type=bool, default=False, help="stop training early when performance saturates")
+    parser.add_argument('-visualize', type=bool, default=False, help="visualize training")
     args = parser.parse_args()
 
     os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
@@ -135,7 +137,7 @@ if __name__ == "__main__":
 
     if(args.mode == "train"):
         print("training...")
-        train(env, agent, args.n_games, args.early_stopping)
+        train(env, agent, args.n_games, args.load_checkpoint, args.early_stopping, args.visualize)
     elif(args.mode == "play"):
         print("playing...")
         play(env, agent, args.n_games, args.frame_delay)
